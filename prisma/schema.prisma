@@ -1,0 +1,655 @@
+// BV Cartórios — schema do banco de dados
+// Documentação do modelo (ERD + decisões): docs/ERD.md
+//
+// Convenções:
+// - Models em inglês (padrão do código); UI e conteúdo em pt-BR.
+// - Tabelas mapeadas para snake_case (@@map) para facilitar SQL/analytics.
+// - Toda alteração aqui exige migration versionada (`npm run db:migrate`).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  STUDENT
+  EDITOR
+  ADMIN
+}
+
+enum SubscriptionStatus {
+  PENDING // aguardando primeiro pagamento
+  ACTIVE
+  PAST_DUE // pagamento atrasado, ainda em carência
+  CANCELED
+  EXPIRED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  CHARGEBACK
+}
+
+enum PaymentMethod {
+  PIX
+  CREDIT_CARD
+  BOLETO
+}
+
+enum CouponType {
+  PERCENT
+  FIXED
+}
+
+enum Letter {
+  A
+  B
+  C
+  D
+  E
+}
+
+enum QuestionStatus {
+  DRAFT
+  REVIEW
+  PUBLISHED
+  DISABLED
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum VideoProvider {
+  PANDA
+  MUX
+  VIMEO
+  YOUTUBE
+}
+
+enum ReportReason {
+  WRONG_ANSWER_KEY // gabarito incorreto
+  TYPO // erro de digitação
+  OUTDATED // legislação/jurisprudência desatualizada
+  BAD_CLASSIFICATION // matéria/assunto errado
+  BROKEN_MEDIA // imagem ou vídeo com problema
+  OTHER
+}
+
+enum ReportStatus {
+  OPEN
+  IN_REVIEW
+  RESOLVED
+  REJECTED
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+// ---------------------------------------------------------------------------
+// Usuários, autenticação e assinaturas
+// ---------------------------------------------------------------------------
+
+model User {
+  id       String  @id @default(cuid())
+  email    String  @unique
+  name     String
+  /// Nulo apenas para contas migradas do sistema legado com hash incompatível.
+  password String?
+  role     Role    @default(STUDENT)
+  phone    String?
+  cpf      String? @unique
+
+  emailVerifiedAt DateTime?
+  /// Migração: obriga redefinição de senha no primeiro acesso.
+  mustResetPassword Boolean   @default(false)
+  lastLoginAt       DateTime?
+
+  /// LGPD: exclusão lógica preservando integridade do histórico agregado.
+  deletedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscriptions     Subscription[]
+  answers           Answer[]
+  notebooks         Notebook[]
+  favorites         Favorite[]
+  notes             QuestionNote[]
+  reports           QuestionReport[]     @relation("ReportAuthor")
+  resolvedReports   QuestionReport[]     @relation("ReportResolver")
+  examAttempts      ExamAttempt[]
+  sessions          Session[]
+  passwordResets    PasswordResetToken[]
+  authoredQuestions Question[]           @relation("QuestionAuthor")
+  authoredPosts     Post[]
+  announcementReads AnnouncementRead[]
+  legacyMap         LegacyUserMap?
+
+  @@index([role])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+/// Sessão de login (cookie httpOnly guarda o token; aqui fica apenas o hash).
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+model Plan {
+  id             String  @id @default(cuid())
+  slug           String  @unique
+  name           String
+  description    String?
+  priceCents     Int
+  durationMonths Int
+  active         Boolean @default(true)
+  sortOrder      Int     @default(0)
+  /// Identificador do plano no gateway de pagamento.
+  gatewayPlanId  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model Subscription {
+  id       String             @id @default(cuid())
+  userId   String
+  planId   String
+  status   SubscriptionStatus @default(PENDING)
+  startsAt DateTime           @default(now())
+  /// Fim da vigência atual; acesso liberado enquanto status=ACTIVE e endsAt > now.
+  endsAt     DateTime
+  canceledAt DateTime?
+  /// Renovação automática no gateway.
+  autoRenew  Boolean   @default(true)
+
+  gateway               String?
+  gatewayCustomerId     String?
+  gatewaySubscriptionId String? @unique
+
+  couponId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan     Plan      @relation(fields: [planId], references: [id])
+  coupon   Coupon?   @relation(fields: [couponId], references: [id])
+  payments Payment[]
+
+  @@index([userId, status])
+  @@index([status, endsAt])
+  @@map("subscriptions")
+}
+
+model Payment {
+  id               String        @id @default(cuid())
+  subscriptionId   String
+  amountCents      Int
+  status           PaymentStatus @default(PENDING)
+  method           PaymentMethod
+  gatewayPaymentId String?       @unique
+  paidAt           DateTime?
+  /// Payload bruto do webhook, para auditoria e reprocessamento.
+  rawPayload       Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+  @@index([status, paidAt])
+  @@map("payments")
+}
+
+model Coupon {
+  id             String     @id @default(cuid())
+  code           String     @unique
+  type           CouponType
+  /// Percentual (0-100) quando type=PERCENT; centavos quando type=FIXED.
+  value          Int
+  maxRedemptions Int?
+  redemptions    Int        @default(0)
+  expiresAt      DateTime?
+  active         Boolean    @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscriptions Subscription[]
+
+  @@map("coupons")
+}
+
+// ---------------------------------------------------------------------------
+// Taxonomia e banco de questões
+// ---------------------------------------------------------------------------
+
+model Subject {
+  id        String  @id @default(cuid())
+  name      String  @unique
+  slug      String  @unique
+  sortOrder Int     @default(0)
+  active    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  topics    Topic[]
+  questions Question[]
+
+  @@map("subjects")
+}
+
+model Topic {
+  id        String  @id @default(cuid())
+  subjectId String
+  name      String
+  slug      String
+  sortOrder Int     @default(0)
+  active    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subject   Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subtopics Subtopic[]
+  questions Question[]
+
+  @@unique([subjectId, slug])
+  @@index([subjectId])
+  @@map("topics")
+}
+
+model Subtopic {
+  id        String  @id @default(cuid())
+  topicId   String
+  name      String
+  slug      String
+  sortOrder Int     @default(0)
+  active    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  topic     Topic      @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  questions Question[]
+
+  @@unique([topicId, slug])
+  @@index([topicId])
+  @@map("subtopics")
+}
+
+/// Banca organizadora (FGV, ENAC, Cebraspe...).
+model Board {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  questions Question[]
+
+  @@map("boards")
+}
+
+model Question {
+  id   String @id @default(cuid())
+  /// Número sequencial exibido ao aluno ("Questão 1234").
+  code Int    @unique @default(autoincrement())
+
+  /// Enunciado em HTML sanitizado.
+  statement   String
+  /// Comentário do professor em HTML sanitizado (fundamentação, doutrina, jurisprudência).
+  explanation String
+  answerKey   Letter
+
+  subjectId  String
+  topicId    String?
+  subtopicId String?
+  boardId    String?
+  /// Ano da prova de origem; nulo em questões inéditas sem referência.
+  year       Int?
+  /// Prova/origem: "ENAC 2024 - TJSP", "Inédita", etc.
+  source     String?
+
+  status     QuestionStatus @default(DRAFT)
+  difficulty Difficulty?
+
+  videoId       String?
+  videoProvider VideoProvider?
+
+  authorId    String?
+  publishedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subject      Subject            @relation(fields: [subjectId], references: [id])
+  topic        Topic?             @relation(fields: [topicId], references: [id])
+  subtopic     Subtopic?          @relation(fields: [subtopicId], references: [id])
+  board        Board?             @relation(fields: [boardId], references: [id])
+  author       User?              @relation("QuestionAuthor", fields: [authorId], references: [id])
+  alternatives Alternative[]
+  answers      Answer[]
+  notebooks    NotebookQuestion[]
+  favorites    Favorite[]
+  notes        QuestionNote[]
+  reports      QuestionReport[]
+  exams        ExamQuestion[]
+  legacyMap    LegacyQuestionMap?
+
+  @@index([status, subjectId])
+  @@index([topicId])
+  @@index([subtopicId])
+  @@index([boardId, year])
+  @@map("questions")
+}
+
+model Alternative {
+  id         String @id @default(cuid())
+  questionId String
+  letter     Letter
+  /// Texto da alternativa em HTML sanitizado.
+  text       String
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([questionId, letter])
+  @@index([questionId])
+  @@map("alternatives")
+}
+
+// ---------------------------------------------------------------------------
+// Atividade do aluno
+// ---------------------------------------------------------------------------
+
+model Answer {
+  id            String   @id @default(cuid())
+  userId        String
+  questionId    String
+  letter        Letter
+  isCorrect     Boolean
+  /// Preenchido quando a resposta faz parte de um simulado.
+  examAttemptId String?
+  createdAt     DateTime @default(now())
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question    Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  examAttempt ExamAttempt? @relation(fields: [examAttemptId], references: [id], onDelete: Cascade)
+
+  @@index([userId, questionId])
+  @@index([userId, createdAt])
+  @@index([questionId])
+  @@index([examAttemptId])
+  @@map("answers")
+}
+
+model Notebook {
+  id          String  @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questions NotebookQuestion[]
+
+  @@index([userId])
+  @@map("notebooks")
+}
+
+model NotebookQuestion {
+  notebookId String
+  questionId String
+  addedAt    DateTime @default(now())
+
+  notebook Notebook @relation(fields: [notebookId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@id([notebookId, questionId])
+  @@index([questionId])
+  @@map("notebook_questions")
+}
+
+model Favorite {
+  userId     String
+  questionId String
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@id([userId, questionId])
+  @@index([questionId])
+  @@map("favorites")
+}
+
+/// Anotação pessoal do aluno sobre uma questão (texto simples).
+model QuestionNote {
+  id         String @id @default(cuid())
+  userId     String
+  questionId String
+  content    String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@index([questionId])
+  @@map("question_notes")
+}
+
+model QuestionReport {
+  id         String       @id @default(cuid())
+  userId     String
+  questionId String
+  reason     ReportReason
+  message    String?
+  status     ReportStatus @default(OPEN)
+
+  resolvedById   String?
+  resolvedAt     DateTime?
+  resolutionNote String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user       User     @relation("ReportAuthor", fields: [userId], references: [id], onDelete: Cascade)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  resolvedBy User?    @relation("ReportResolver", fields: [resolvedById], references: [id])
+
+  @@index([status, createdAt])
+  @@index([questionId])
+  @@index([userId])
+  @@map("question_reports")
+}
+
+// ---------------------------------------------------------------------------
+// Simulados
+// ---------------------------------------------------------------------------
+
+model Exam {
+  id              String    @id @default(cuid())
+  title           String
+  slug            String    @unique
+  description     String?
+  durationMinutes Int
+  availableFrom   DateTime?
+  availableUntil  DateTime?
+  published       Boolean   @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  questions ExamQuestion[]
+  attempts  ExamAttempt[]
+
+  @@index([published, availableFrom])
+  @@map("exams")
+}
+
+model ExamQuestion {
+  examId     String
+  questionId String
+  position   Int
+
+  exam     Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@id([examId, questionId])
+  @@unique([examId, position])
+  @@index([questionId])
+  @@map("exam_questions")
+}
+
+model ExamAttempt {
+  id         String    @id @default(cuid())
+  examId     String
+  userId     String
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+  /// Acertos e total gravados no encerramento, para ranking e comparação com a média.
+  correctCount Int?
+  totalCount   Int?
+
+  exam    Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers Answer[]
+
+  @@index([examId, userId])
+  @@index([userId])
+  @@map("exam_attempts")
+}
+
+// ---------------------------------------------------------------------------
+// Conteúdo institucional
+// ---------------------------------------------------------------------------
+
+model Post {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  title       String
+  excerpt     String?
+  /// Conteúdo em HTML sanitizado.
+  content     String
+  coverImage  String?
+  status      PostStatus @default(DRAFT)
+  publishedAt DateTime?
+  authorId    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author User? @relation(fields: [authorId], references: [id])
+
+  @@index([status, publishedAt])
+  @@map("posts")
+}
+
+/// Aviso publicado pelo admin e exibido na área do aluno.
+model Announcement {
+  id          String    @id @default(cuid())
+  title       String
+  body        String
+  publishedAt DateTime?
+  expiresAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reads AnnouncementRead[]
+
+  @@index([publishedAt])
+  @@map("announcements")
+}
+
+model AnnouncementRead {
+  announcementId String
+  userId         String
+  readAt         DateTime @default(now())
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([announcementId, userId])
+  @@index([userId])
+  @@map("announcement_reads")
+}
+
+// ---------------------------------------------------------------------------
+// Migração do sistema legado (ver docs/MIGRACAO.md)
+// ---------------------------------------------------------------------------
+
+model LegacyQuestionMap {
+  legacyId   String   @id
+  questionId String   @unique
+  migratedAt DateTime @default(now())
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("legacy_question_map")
+}
+
+model LegacyUserMap {
+  legacyId   String   @id
+  userId     String   @unique
+  migratedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("legacy_user_map")
+}

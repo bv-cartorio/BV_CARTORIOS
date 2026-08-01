@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens da BV Cartórios.
+ * Paleta sóbria (azul-marinho institucional + dourado) coerente com o universo
+ * notarial e registral, com contraste adequado para leitura longa no celular.
+ */
+@theme {
+  --color-marinho-50: #eef2f9;
+  --color-marinho-100: #d6e0f0;
+  --color-marinho-200: #adc0e1;
+  --color-marinho-300: #7d99cd;
+  --color-marinho-400: #4d70b3;
+  --color-marinho-500: #2f5194;
+  --color-marinho-600: #234075;
+  --color-marinho-700: #1b3159;
+  --color-marinho-800: #142440;
+  --color-marinho-900: #0e1a2e;
+
+  --color-dourado-300: #e3c67a;
+  --color-dourado-400: #d4ae4e;
+  --color-dourado-500: #b8912f;
+  --color-dourado-600: #96751f;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * Conteúdo jurídico em HTML (enunciados, comentários e posts do blog).
+ * O editor do admin produz um subconjunto controlado de tags; os estilos abaixo
+ * garantem leitura confortável sem depender de plugin de tipografia.
+ */
+.conteudo-rico {
+  line-height: 1.75;
+}
+
+.conteudo-rico > * + * {
+  margin-top: 1rem;
+}
+
+.conteudo-rico h2,
+.conteudo-rico h3,
+.conteudo-rico h4 {
+  font-weight: 600;
+  color: var(--color-marinho-800);
+  margin-top: 1.75rem;
+}
+
+.conteudo-rico h2 {
+  font-size: 1.25rem;
+}
+
+.conteudo-rico h3 {
+  font-size: 1.125rem;
+}
+
+.conteudo-rico ul,
+.conteudo-rico ol {
+  padding-left: 1.5rem;
+}
+
+.conteudo-rico ul {
+  list-style: disc;
+}
+
+.conteudo-rico ol {
+  list-style: decimal;
+}
+
+.conteudo-rico li + li {
+  margin-top: 0.5rem;
+}
+
+.conteudo-rico strong {
+  font-weight: 600;
+  color: var(--color-marinho-900);
+}
+
+.conteudo-rico em {
+  font-style: italic;
+}
+
+.conteudo-rico blockquote {
+  border-left: 3px solid var(--color-dourado-400);
+  padding-left: 1rem;
+  color: var(--color-marinho-700);
+  font-style: italic;
+}
+
+.conteudo-rico a {
+  color: var(--color-marinho-600);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.conteudo-rico img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+.conteudo-rico table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.925rem;
+}
+
+.conteudo-rico th,
+.conteudo-rico td {
+  border: 1px solid var(--color-marinho-100);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
