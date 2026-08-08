@@ -9,7 +9,7 @@ export function SiteFooter() {
     <footer className="mt-auto bg-marinho-800 text-marinho-200">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <Logo variante="clara" className="text-3xl" />
+          <Logo variante="clara" className="h-9 w-auto" />
           <p className="mt-3 text-sm text-marinho-300">
             Preparação para concursos de serviços notariais e de registro.
           </p>

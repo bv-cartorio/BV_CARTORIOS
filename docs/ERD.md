@@ -12,7 +12,7 @@ erDiagram
     Coupon ||--o{ Subscription : desconta
     Subscription ||--o{ Payment : gera
     User ||--o{ Session : autentica
-    User ||--o{ PasswordResetToken : redefine
+    User ||--o{ UserToken : recebe
 
     Subject ||--o{ Topic : contem
     Topic ||--o{ Subtopic : contem
@@ -111,6 +111,24 @@ renderização usa a classe `.conteudo-rico` definida em
 [`src/app/globals.css`](../src/app/globals.css). Sanitizar na escrita, e não na
 leitura, evita pagar o custo em toda requisição e garante que o que está no
 banco é seguro.
+
+### Sessões e tokens
+
+`Session.tokenHash` e `UserToken.tokenHash` guardam **apenas o hash** (SHA-256)
+do valor que circula no cookie ou no link. Quem obtiver uma cópia do banco não
+consegue entrar na conta de ninguém nem usar um link de redefinição. Como esses
+valores têm 256 bits de entropia, hash sem sal basta — não há dicionário nem
+força bruta viável, diferente do que ocorre com senha.
+
+`UserToken` é um único model para dois propósitos (`PASSWORD_RESET` e
+`EMAIL_VERIFICATION`) porque o mecanismo é idêntico: token de uso único, com
+prazo, enviado por e-mail. Definir senha atende a três situações — primeiro
+acesso após compra na Hotmart, conta migrada com hash incompatível e "esqueci
+minha senha" — sem código duplicado.
+
+`LoginAttempt` sustenta o rate limiting. Fica no banco, e não em memória,
+porque em ambiente serverless cada requisição pode cair num processo diferente:
+um contador em memória não limitaria nada.
 
 ### LGPD
 

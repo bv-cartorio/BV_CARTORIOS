@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <rect width="64" height="64" rx="12" fill="#1c3450" />
-  <text
-    x="30"
-    y="45"
-    text-anchor="middle"
-    font-family="Helvetica, Arial, sans-serif"
-    font-size="38"
-    font-weight="700"
-    letter-spacing="-2"
-    fill="#f5f3ef"
-  >bv</text>
-  <rect x="48" y="36" width="9" height="9" fill="#ef5a28" />
+  <!-- Mesmo wordmark do componente Logo, reduzido e centrado no ícone. -->
+  <svg x="9" y="18.5" width="46" height="27" viewBox="18 8 440 260" fill="#f5f3ef">
+    <path
+      fill-rule="nonzero"
+      d="M18 8 H88 V268 H18 Z
+         M142 72 H146 A82 82 0 0 1 228 154 V186 A82 82 0 0 1 146 268 H142 A82 82 0 0 1 60 186 V154 A82 82 0 0 1 142 72 Z
+         M139 130 A33 33 0 0 0 106 163 V177 A33 33 0 0 0 139 210 A33 33 0 0 0 172 177 V163 A33 33 0 0 0 139 130 Z"
+    />
+    <path d="M212 72 H287 L318.5 175 L350 72 H425 L340 268 H297 Z" />
+    <rect x="392" y="202" width="66" height="66" fill="#ef5a28" />
+  </svg>
 </svg>
