@@ -12,9 +12,9 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-creme-200 bg-creme/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
-        <Link href="/" className="flex items-baseline gap-2">
-          <Logo className="text-3xl" />
-          <span className="hidden text-base font-semibold tracking-tight text-marinho-700 sm:inline">
+        <Link href="/" className="flex items-center gap-2.5">
+          <Logo rotulo="BV" className="h-7 w-auto" />
+          <span className="hidden text-lg font-semibold tracking-tight text-marinho-700 sm:inline">
             Cartórios
           </span>
         </Link>
