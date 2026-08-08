@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useMemo } from "react";
 
 import { salvarAnotacao } from "@/app/painel/questoes/acoes";
@@ -62,6 +63,13 @@ export function Anotacao({ questionId, codigo, inicial }: AnotacaoProps) {
             {estado.conteudo ? "Anotação salva." : "Anotação apagada."}
           </span>
         )}
+
+        <Link
+          href="/painel/anotacoes"
+          className="ml-auto text-sm font-medium text-marinho-600 hover:text-marinho-900"
+        >
+          Ver todas as anotações
+        </Link>
       </div>
     </form>
   );

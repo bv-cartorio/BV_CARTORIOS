@@ -67,6 +67,19 @@ enum QuestionStatus {
   DISABLED
 }
 
+/// Formato da questão.
+///
+/// `TRUE_FALSE` (o "certo/errado" da Cebraspe) é modelado como uma questão de
+/// duas alternativas — A = "Certo", B = "Errado" — e não como um campo booleano
+/// separado. Assim `answerKey`, `Alternative` e `Answer` continuam iguais para
+/// os dois formatos: o histórico, as estatísticas e os filtros de
+/// acertadas/erradas seguem funcionando sem nenhum caso especial. O que muda é
+/// só a forma de apresentar as opções ao aluno.
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+}
+
 enum Difficulty {
   EASY
   MEDIUM
@@ -377,6 +390,7 @@ model Question {
   /// Comentário do professor em HTML sanitizado (fundamentação, doutrina, jurisprudência).
   explanation String
   answerKey   Letter
+  type        QuestionType @default(MULTIPLE_CHOICE)
 
   subjectId  String
   topicId    String?

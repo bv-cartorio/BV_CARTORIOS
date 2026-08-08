@@ -12,6 +12,7 @@ import { hash } from "bcryptjs";
 
 import { PrismaClient } from "../src/generated/prisma/client";
 import { Letter, QuestionStatus, Difficulty } from "../src/generated/prisma/enums";
+import { slugify } from "../src/lib/slug";
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -25,16 +26,6 @@ const prisma = new PrismaClient({
 
 const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL ?? "admin@bvcartorio.com";
 const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD ?? "bvcartorios123";
-
-/** Converte "Direito Notarial e Registral" em "direito-notarial-e-registral". */
-function slugify(texto: string): string {
-  return texto
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
 
 const BANCAS = [
   "ENAC",

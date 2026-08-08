@@ -19,11 +19,19 @@ export async function exigirUsuario(destino?: string): Promise<UsuarioSessao> {
   return usuario;
 }
 
-/** Exige um dos papéis informados. */
+/**
+ * Exige um dos papéis informados.
+ *
+ * O `destino` é repassado ao login: sem ele, quem chega direto a `/admin` sem
+ * sessão entra e cai no painel do aluno, tendo de navegar de novo até onde
+ * queria. Quem tem sessão mas não tem o papel vai para o painel — está
+ * autenticado, só não é lugar dele.
+ */
 export async function exigirPapel(
-  ...papeis: Role[]
+  papeis: Role[],
+  destino?: string,
 ): Promise<UsuarioSessao> {
-  const usuario = await exigirUsuario();
+  const usuario = await exigirUsuario(destino);
 
   if (!papeis.includes(usuario.role)) {
     redirect("/painel");

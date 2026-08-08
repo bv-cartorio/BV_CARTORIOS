@@ -8,6 +8,7 @@ import { RESPOSTA_INICIAL } from "@/app/painel/questoes/estados";
 import { Alternativas } from "@/components/questao/alternativas";
 import { useCota } from "@/components/questao/cota";
 import { Resolucao } from "@/components/questao/resolucao";
+import type { QuestionType } from "@/generated/prisma/enums";
 import type {
   Alternativa,
   MinhaResposta,
@@ -17,6 +18,7 @@ import type {
 type BlocoRespostaProps = {
   questionId: string;
   codigo: number;
+  tipo: QuestionType;
   alternativas: Alternativa[];
   /** Resposta que veio do servidor; `null` quando o aluno pediu para refazer. */
   respostaAnterior: MinhaResposta | null;
@@ -34,6 +36,7 @@ type BlocoRespostaProps = {
 export function BlocoResposta({
   questionId,
   codigo,
+  tipo,
   alternativas,
   respostaAnterior,
   resolucaoAnterior,
@@ -68,6 +71,7 @@ export function BlocoResposta({
       <>
         <Alternativas
           codigo={codigo}
+          tipo={tipo}
           alternativas={alternativas}
           resultado={{
             minhaLetra: resolvida.letra,
@@ -97,7 +101,7 @@ export function BlocoResposta({
 
   return (
     <form action={enviar}>
-      <Alternativas codigo={codigo} alternativas={alternativas} />
+      <Alternativas codigo={codigo} tipo={tipo} alternativas={alternativas} />
 
       {estado.situacao === "erro" && (
         <div

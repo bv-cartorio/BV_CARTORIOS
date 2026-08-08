@@ -8,7 +8,12 @@
  * resposta no código-fonte da página.
  */
 import type { Prisma } from "@/generated/prisma/client";
-import type { Difficulty, Letter, VideoProvider } from "@/generated/prisma/enums";
+import type {
+  Difficulty,
+  Letter,
+  QuestionType,
+  VideoProvider,
+} from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { QUESTOES_POR_PAGINA, type Filtros } from "@/lib/questoes/filtros";
 
@@ -25,6 +30,7 @@ export type MinhaResposta = { letra: Letter; acertei: boolean };
 export type QuestaoLista = {
   id: string;
   codigo: number;
+  tipo: QuestionType;
   enunciado: string;
   alternativas: Alternativa[];
   materia: string;
@@ -171,6 +177,7 @@ export async function buscarQuestoes(
       select: {
         id: true,
         code: true,
+        type: true,
         statement: true,
         year: true,
         source: true,
@@ -205,6 +212,7 @@ export async function buscarQuestoes(
     return {
       id: q.id,
       codigo: q.code,
+      tipo: q.type,
       enunciado: q.statement,
       alternativas: q.alternatives.map((a) => ({
         letra: a.letter,

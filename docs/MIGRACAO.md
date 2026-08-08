@@ -45,13 +45,25 @@ descartados: vão para uma matéria "A classificar", visível no admin.
 
 Para cada questão do legado:
 
-- sanitizar `statement`, `explanation` e alternativas (allowlist de tags:
-  `p, strong, em, u, ul, ol, li, h2, h3, h4, blockquote, a, img, table, thead,
-  tbody, tr, th, td, br, sup, sub`);
+- sanitizar `statement`, `explanation` e alternativas com `sanitizarHtml` de
+  `src/lib/sanitizar.ts` — a allowlist já existe e é a mesma do admin, o que
+  torna verificável o critério "nenhuma tag fora da allowlist";
+- **rebaixar as imagens** dos enunciados para o bucket R2 e reescrever os `src`.
+  O sistema legado sai do ar 30 dias depois do corte (ver abaixo); imagem que
+  continuar apontando para lá quebra junto;
 - resolver matéria/assunto/subassunto pelo mapa de taxonomia;
 - resolver a banca (criando `Board` quando necessário);
 - preservar o número da questão em `Question.code` quando o id legado for
-  numérico;
+  numérico — e, **ao fim da importação**, realinhar a sequência:
+
+  ```sql
+  SELECT setval(pg_get_serial_sequence('questions','code'),
+                COALESCE((SELECT MAX(code) FROM questions), 1));
+  ```
+
+  `questions.code` é `SERIAL`: inserir valor explícito não avança a sequência,
+  e sem esse `setval` a primeira questão criada pelo admin depois da migração
+  nasceria com um código já ocupado. O importador CSV do módulo 3 já faz isso;
 - gravar `LegacyQuestionMap`.
 
 Idempotência: a existência de `LegacyQuestionMap.legacyId` decide entre criar e
