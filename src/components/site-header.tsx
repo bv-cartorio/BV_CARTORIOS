@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { Logo } from "@/components/logo";
+
 const LINKS = [
   { href: "/#como-funciona", label: "Como funciona" },
   { href: "/#planos", label: "Planos" },
@@ -8,14 +10,12 @@ const LINKS = [
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-30 border-b border-marinho-100 bg-white/90 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-creme-200 bg-creme/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="grid size-9 place-items-center rounded-lg bg-marinho-700 font-semibold text-dourado-300">
-            BV
-          </span>
-          <span className="text-base font-semibold tracking-tight text-marinho-800">
-            BV Cartórios
+        <Link href="/" className="flex items-baseline gap-2">
+          <Logo className="text-3xl" />
+          <span className="hidden text-base font-semibold tracking-tight text-marinho-700 sm:inline">
+            Cartórios
           </span>
         </Link>
 
@@ -40,7 +40,7 @@ export function SiteHeader() {
           </Link>
           <Link
             href="/#planos"
-            className="rounded-lg bg-marinho-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-marinho-800"
+            className="rounded-lg bg-laranja-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-laranja-600"
           >
             Assinar
           </Link>

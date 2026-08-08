@@ -33,11 +33,11 @@ export function PlanCard({
       className={`relative flex flex-col rounded-2xl border p-6 ${
         destaque
           ? "border-marinho-700 bg-marinho-800 text-white shadow-xl"
-          : "border-marinho-100 bg-white"
+          : "border-creme-200 bg-white"
       }`}
     >
       {destaque && (
-        <span className="absolute -top-3 left-6 rounded-full bg-dourado-400 px-3 py-1 text-xs font-semibold text-marinho-900">
+        <span className="absolute -top-3 left-6 rounded-full bg-laranja-500 px-3 py-1 text-xs font-semibold text-white">
           Mais escolhido
         </span>
       )}
@@ -84,7 +84,7 @@ export function PlanCard({
           <li key={beneficio} className="flex gap-2">
             <span
               aria-hidden
-              className={destaque ? "text-dourado-300" : "text-dourado-500"}
+              className={destaque ? "text-laranja-400" : "text-laranja-500"}
             >
               ✓
             </span>
@@ -97,7 +97,7 @@ export function PlanCard({
         href={`/assinar/${slug}`}
         className={`mt-8 rounded-lg px-4 py-3 text-center text-sm font-semibold transition-colors ${
           destaque
-            ? "bg-dourado-400 text-marinho-900 hover:bg-dourado-300"
+            ? "bg-laranja-500 text-white hover:bg-laranja-400"
             : "bg-marinho-700 text-white hover:bg-marinho-800"
         }`}
       >

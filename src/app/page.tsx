@@ -69,9 +69,9 @@ export default async function HomePage() {
 
       <main className="flex-1">
         {/* Hero ------------------------------------------------------------ */}
-        <section className="bg-gradient-to-b from-marinho-800 to-marinho-900 text-white">
+        <section className="bg-gradient-to-b from-marinho-700 to-marinho-900 text-white">
           <div className="mx-auto max-w-6xl px-4 py-20 sm:py-28">
-            <p className="text-sm font-medium uppercase tracking-widest text-dourado-300">
+            <p className="text-sm font-medium uppercase tracking-widest text-laranja-400">
               Concursos de cartório · FGV e ENAC
             </p>
             <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
@@ -86,7 +86,7 @@ export default async function HomePage() {
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="#planos"
-                className="rounded-lg bg-dourado-400 px-6 py-3 text-center font-semibold text-marinho-900 transition-colors hover:bg-dourado-300"
+                className="rounded-lg bg-laranja-500 px-6 py-3 text-center font-semibold text-white transition-colors hover:bg-laranja-400"
               >
                 Ver planos
               </Link>
@@ -101,7 +101,7 @@ export default async function HomePage() {
         </section>
 
         {/* Números --------------------------------------------------------- */}
-        <section className="border-b border-marinho-100 bg-marinho-50">
+        <section className="border-b border-creme-200 bg-creme">
           <dl className="mx-auto grid max-w-6xl grid-cols-2 gap-6 px-4 py-10 sm:grid-cols-3">
             <div>
               <dt className="text-sm text-marinho-600">Questões publicadas</dt>
@@ -137,7 +137,7 @@ export default async function HomePage() {
             {ETAPAS.map((etapa, indice) => (
               <li
                 key={etapa.titulo}
-                className="rounded-2xl border border-marinho-100 p-6"
+                className="rounded-2xl border border-creme-200 p-6"
               >
                 <span className="grid size-9 place-items-center rounded-full bg-marinho-700 text-sm font-semibold text-white">
                   {indice + 1}
@@ -153,7 +153,7 @@ export default async function HomePage() {
 
         {/* Matérias -------------------------------------------------------- */}
         {materias.length > 0 && (
-          <section className="border-y border-marinho-100 bg-marinho-50">
+          <section className="border-y border-creme-200 bg-creme">
             <div className="mx-auto max-w-6xl px-4 py-16">
               <h2 className="text-3xl font-bold tracking-tight text-marinho-800">
                 Matérias do acervo
@@ -162,7 +162,7 @@ export default async function HomePage() {
                 {materias.map((materia) => (
                   <li
                     key={materia.id}
-                    className="rounded-full border border-marinho-200 bg-white px-4 py-2 text-sm text-marinho-700"
+                    className="rounded-full border border-creme-200 bg-white px-4 py-2 text-sm text-marinho-700"
                   >
                     {materia.name}
                   </li>
@@ -197,7 +197,7 @@ export default async function HomePage() {
         </section>
 
         {/* Dúvidas --------------------------------------------------------- */}
-        <section className="border-t border-marinho-100 bg-marinho-50">
+        <section className="border-t border-creme-200 bg-creme">
           <div className="mx-auto max-w-3xl px-4 py-20">
             <h2 className="text-3xl font-bold tracking-tight text-marinho-800">
               Perguntas frequentes
@@ -206,7 +206,7 @@ export default async function HomePage() {
               {PERGUNTAS.map((item) => (
                 <div
                   key={item.pergunta}
-                  className="rounded-2xl border border-marinho-100 bg-white p-6"
+                  className="rounded-2xl border border-creme-200 bg-white p-6"
                 >
                   <dt className="font-semibold text-marinho-800">
                     {item.pergunta}
