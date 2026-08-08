@@ -1,26 +1,37 @@
 @import "tailwindcss";
 
 /*
- * Design tokens da BV Cartórios.
- * Paleta sóbria (azul-marinho institucional + dourado) coerente com o universo
- * notarial e registral, com contraste adequado para leitura longa no celular.
+ * Design tokens da BV Cartórios — derivados da marca.
+ *
+ * A logo define três cores: o azul-marinho do lettering "bv", o laranja do
+ * ponto e da faixa, e o creme do fundo. `marinho-700` e `laranja-500` são as
+ * cores exatas da marca; os demais tons são a escala construída em volta delas
+ * para estados, bordas e superfícies.
  */
 @theme {
-  --color-marinho-50: #eef2f9;
-  --color-marinho-100: #d6e0f0;
-  --color-marinho-200: #adc0e1;
-  --color-marinho-300: #7d99cd;
-  --color-marinho-400: #4d70b3;
-  --color-marinho-500: #2f5194;
-  --color-marinho-600: #234075;
-  --color-marinho-700: #1b3159;
-  --color-marinho-800: #142440;
-  --color-marinho-900: #0e1a2e;
+  --color-marinho-50: #eff2f6;
+  --color-marinho-100: #d8e0e9;
+  --color-marinho-200: #b0c1d3;
+  --color-marinho-300: #809bb7;
+  --color-marinho-400: #4f7398;
+  --color-marinho-500: #2f5578;
+  --color-marinho-600: #234260;
+  --color-marinho-700: #1c3450; /* marca */
+  --color-marinho-800: #142639;
+  --color-marinho-900: #0d1926;
 
-  --color-dourado-300: #e3c67a;
-  --color-dourado-400: #d4ae4e;
-  --color-dourado-500: #b8912f;
-  --color-dourado-600: #96751f;
+  --color-laranja-50: #fef2ed;
+  --color-laranja-100: #fbdcd0;
+  --color-laranja-200: #f8bda5;
+  --color-laranja-300: #f59872;
+  --color-laranja-400: #f2743f;
+  --color-laranja-500: #ef5a28; /* marca */
+  --color-laranja-600: #d24717;
+  --color-laranja-700: #ad3712;
+
+  /* Fundo institucional da marca e sua variação para faixas alternadas. */
+  --color-creme: #f5f3ef;
+  --color-creme-200: #e9e5dd;
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
@@ -87,7 +98,7 @@ body {
 }
 
 .conteudo-rico blockquote {
-  border-left: 3px solid var(--color-dourado-400);
+  border-left: 3px solid var(--color-laranja-500);
   padding-left: 1rem;
   color: var(--color-marinho-700);
   font-style: italic;
