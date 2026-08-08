@@ -4,20 +4,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const ITENS = [
-  { href: "/painel", rotulo: "Início" },
-  { href: "/painel/questoes", rotulo: "Questões" },
-  { href: "/painel/anotacoes", rotulo: "Anotações" },
+  { href: "/admin", rotulo: "Início" },
+  { href: "/admin/questoes", rotulo: "Questões" },
+  { href: "/admin/taxonomia", rotulo: "Taxonomia" },
+  { href: "/admin/reportes", rotulo: "Reportes" },
+  { href: "/admin/importar", rotulo: "Importar" },
 ];
 
-export function NavegacaoPainel() {
+export function NavegacaoAdmin() {
   const caminho = usePathname();
 
   return (
-    <nav aria-label="Área do aluno" className="flex items-center gap-1">
+    <nav aria-label="Administração" className="flex flex-wrap items-center gap-1">
       {ITENS.map((item) => {
         const ativo =
-          item.href === "/painel"
-            ? caminho === "/painel"
+          item.href === "/admin"
+            ? caminho === "/admin"
             : caminho.startsWith(item.href);
 
         return (
@@ -27,8 +29,8 @@ export function NavegacaoPainel() {
             aria-current={ativo ? "page" : undefined}
             className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
               ativo
-                ? "bg-creme text-marinho-900"
-                : "text-marinho-600 hover:bg-creme hover:text-marinho-900"
+                ? "bg-marinho-600 text-white"
+                : "text-marinho-100 hover:bg-marinho-600/60 hover:text-white"
             }`}
           >
             {item.rotulo}

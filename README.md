@@ -82,14 +82,23 @@ src/
     (auth)/              login, cadastro, recuperação e definição de senha
     painel/              área do aluno (exige sessão)
       questoes/          busca, resolução e ações sobre a questão
+      anotacoes/         anotações do aluno com a questão de origem
+    admin/               administração (exige papel ADMIN)
+      questoes/          CRUD, status editorial e pré-visualização
+      taxonomia/         matérias, assuntos, subassuntos e bancas
+      reportes/          fila de erros apontados pelos alunos
+      importar/          carga de questões por CSV
   components/
+    admin/               editor de texto rico, taxonomia, reportes e importação
     filtros/             barra de filtros da busca
     painel/              navegação da área do aluno
     questao/             cartão, alternativas, resolução, anotação e reporte
     ui/                  peças genéricas de interface
   lib/
     auth/                sessão, senha, tokens, guardas e rate limiting
-    questoes/            filtros, consulta do acervo e cota do plano gratuito
+    questoes/            filtros, consulta, cota, taxonomia, reportes e CSV
+    sanitizar.ts         allowlist única do HTML rico (escrita)
+    storage.ts           imagens no Cloudflare R2
   generated/prisma/      Prisma Client gerado (fora do controle de versão)
 docs/
   ERD.md                 diagrama e decisões do modelo de dados

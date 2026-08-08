@@ -35,10 +35,15 @@ implementação.
 - busca por texto ou número da questão e filtros de matéria, assunto,
   subassunto, banca, ano, situação e favoritas — tudo na URL, então o link é
   compartilhável e o botão voltar funciona
-- resolução com correção imediata, comentário do professor e vídeo quando
-  houver; o aluno pode responder de novo (o histórico guarda toda tentativa)
+- tesoura para riscar e desriscar alternativa enquanto resolve — rascunho do
+  aluno, vive só na tela e não vai ao banco
+- resolução com correção imediata e abas **Gabarito comentado** e **Resolução
+  em vídeo** (a de vídeo só existe quando há vídeo com player); o aluno pode
+  responder de novo, e o histórico guarda toda tentativa
 - favoritas, anotação pessoal por questão e reporte de erro para a revisão
   editorial
+- página **Minhas anotações** (`/painel/anotacoes`): cada anotação ao lado do
+  enunciado que a motivou, com atalho para reabrir a questão
 - **gabarito e comentário nunca vão para o navegador antes de a questão ser
   respondida** — só a server action de resposta os devolve
 - acesso gratuito por cota diária (ver decisões abaixo)
@@ -46,15 +51,31 @@ implementação.
 Sem migration: `Answer`, `Favorite`, `QuestionNote` e `QuestionReport` já
 existiam desde a fundação.
 
-## Próximos módulos
-
 ### 3. Admin — questões e taxonomia
 
-CRUD de questões com editor de texto rico e sanitização na escrita, campo de
-vídeo, status editorial (rascunho → revisão → publicada), importação CSV,
-gestão de matérias/assuntos/subassuntos e fila de erros reportados.
+Área `/admin` inteira sob papel `ADMIN` (decisão abaixo).
 
-**Depende de**: 1. Pode correr em paralelo com o 2.
+- CRUD de questões com editor de texto rico (TipTap), alternativas, gabarito,
+  classificação, vídeo e pré-visualização como o aluno vê
+- **Questão certo/errado**, modelada como duas alternativas fixas — ver o
+  comentário do enum `QuestionType` no schema
+- fluxo editorial rascunho → revisão → publicada → desativada; publicar exige
+  comentário do professor
+- **corrigir o gabarito recalcula o acerto das respostas já dadas**, senão o
+  motivo de reporte mais comum deixaria o histórico de todo mundo errado
+- taxonomia com contagem de questões por nó e confirmação de impacto na
+  exclusão (assunto e subassunto desclassificam em silêncio pelo `SET NULL`)
+- fila de erros reportados com triagem, decisão registrada e rastro de quem
+  decidiu — até aqui os reportes do módulo 2 não tinham consumidor
+- importação CSV em dois modos (conferir e gravar), com relatório linha a linha
+- sanitização na escrita com allowlist única em `src/lib/sanitizar.ts`, usada
+  por admin, seed e — quando entrar — pelos scripts de migração
+- imagens em Cloudflare R2; sem as variáveis `R2_*` o envio é recusado com
+  mensagem clara, em vez de gerar imagem quebrada
+
+Migration: `QuestionType` + `Question.type`, aditiva.
+
+## Próximos módulos
 
 ### 4. Migração do sistema legado
 
@@ -123,6 +144,10 @@ checklist de LGPD (exportação e exclusão de dados).
 | -------------------- | ---------------------------------------------------- |
 | Venda e cobrança     | **Hotmart** — checkout hospedado, sem gateway próprio |
 | Acesso do não assinante | **Cota diária**: 10 questões por dia, com comentário completo |
+| Editor de texto rico | **TipTap** — carrega só no admin |
+| Imagens dos enunciados | **Cloudflare R2**, independente da hospedagem |
+| Questão certo/errado | **Sim** — duas alternativas fixas, sem campo booleano novo |
+| Papéis no admin | **Só `ADMIN`**; `EDITOR` fica dormente no enum |
 
 Sobre a cota: conta **questões distintas respondidas no dia**, virando à
 meia-noite de Brasília — refazer uma questão já respondida não gasta cota, e

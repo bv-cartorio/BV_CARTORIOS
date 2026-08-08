@@ -31,6 +31,12 @@ const ATALHOS = [
     titulo: "Minhas favoritas",
     descricao: "As que você separou para revisar antes da prova.",
   },
+  {
+    href: "/painel/anotacoes",
+    titulo: "Minhas anotações",
+    descricao:
+      "Tudo o que você escreveu, ao lado da questão que motivou cada anotação.",
+  },
 ];
 
 export default async function PainelPage() {

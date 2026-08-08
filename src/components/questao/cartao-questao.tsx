@@ -57,6 +57,7 @@ export function CartaoQuestao({ questao }: { questao: QuestaoLista }) {
         key={tentativa}
         questionId={questao.id}
         codigo={questao.codigo}
+        tipo={questao.tipo}
         alternativas={questao.alternativas}
         respostaAnterior={tentativa === 0 ? questao.minhaResposta : null}
         resolucaoAnterior={tentativa === 0 ? questao.resolucao : null}
