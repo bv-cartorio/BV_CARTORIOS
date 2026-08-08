@@ -78,9 +78,12 @@ prisma/
   migrations/            migrations versionadas — nunca editar aplicadas
   seed.ts                dados de desenvolvimento (idempotente)
 src/
-  app/                   rotas (App Router)
+  app/
+    (auth)/              login, cadastro, recuperação e definição de senha
+    painel/              área do aluno (exige sessão)
   components/            componentes de interface
-  lib/                   infraestrutura (prisma, env, formatação)
+  lib/
+    auth/                sessão, senha, tokens, guardas e rate limiting
   generated/prisma/      Prisma Client gerado (fora do controle de versão)
 docs/
   ERD.md                 diagrama e decisões do modelo de dados

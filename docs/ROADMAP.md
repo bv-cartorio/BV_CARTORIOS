@@ -14,23 +14,23 @@ implementação.
 - Seed idempotente: taxonomia, bancas, planos, admin e questões de exemplo
 - Validação de variáveis de ambiente com Zod; `.env.example` documentado
 - Home de vendas com planos e matérias lidos do banco
+- Identidade visual da marca aplicada (wordmark vetorial, paleta e favicon)
 - README, ERD e plano de migração documentados
-
-## Próximos módulos
 
 ### 1. Autenticação e conta
 
-Login, logout, recuperação de senha e **definição de senha no primeiro acesso**.
-Sessão por cookie httpOnly com token hasheado em `Session`; rate limiting no
-login; proteção de rotas por papel (`STUDENT` / `EDITOR` / `ADMIN`) e guarda de
-assinatura ativa.
+- login, logout, autocadastro com confirmação de e-mail, recuperação de senha e
+  definição de senha no primeiro acesso — os três caminhos de entrada (cadastro,
+  compra na Hotmart, migração do legado) convergem para o mesmo token por e-mail
+- sessão por cookie httpOnly; o banco guarda só o hash do token, então vazamento
+  do banco não permite forjar sessão
+- rate limiting de login por e-mail e por IP, persistido no banco
+- guardas `exigirUsuario`, `exigirPapel` e `exigirAssinatura`; a guarda de
+  assinatura já está no lugar e passa a encontrar dados quando a Hotmart entrar
+- envio de e-mail com implementação de console em desenvolvimento; falha
+  explícita em produção enquanto o provedor não for escolhido
 
-Não há autocadastro público: a conta nasce de uma compra na Hotmart (módulo 5)
-ou da migração do legado (módulo 4), sempre sem senha utilizável. Os três
-caminhos — comprou, foi migrado, esqueceu a senha — convergem para o mesmo
-fluxo de token por e-mail.
-
-**Depende de**: nada. É pré-requisito de todo o resto.
+## Próximos módulos
 
 ### 2. Área do aluno — resolver questões
 
@@ -119,9 +119,10 @@ checklist de LGPD (exportação e exclusão de dados).
 
 | Pendência                                  | Necessária a partir de |
 | ------------------------------------------ | ---------------------- |
+| **E-mail transacional** (Resend · Postmark) | ir ao ar com o módulo 1 |
+| **O que o não assinante pode ver** de graça | módulo 2               |
 | Credenciais de desenvolvedor da Hotmart    | módulo 5               |
 | Códigos de produto e de oferta de cada plano | módulo 5             |
-| E-mail transacional (Resend · Postmark)    | módulo 1               |
 | Serviço de vídeo (Panda · Mux · Vimeo Pro) | módulo 3               |
 | Banco gerenciado (Neon · Supabase)         | primeiro deploy        |
 | Hospedagem (Vercel · Railway)              | primeiro deploy        |
@@ -131,6 +132,11 @@ O e-mail transacional é o único item que o módulo 1 realmente exige: sem ele
 não há como enviar o link de definição de senha. Em desenvolvimento o link é
 escrito no console, então dá para construir e testar o módulo inteiro antes da
 escolha — mas não para colocá-lo no ar.
+
+Com o autocadastro liberado, é preciso decidir **o que um visitante sem
+assinatura enxerga**: um número de questões por dia, um conjunto fixo de
+demonstração, ou apenas os enunciados sem o comentário. A guarda de assinatura
+já fica pronta no módulo 1; a regra do gratuito é definida no módulo 2.
 
 Sobre a última linha: a home traz números reais lidos do banco, mas ainda não
 tem a seção de depoimentos. Ela só será construída com depoimentos verdadeiros

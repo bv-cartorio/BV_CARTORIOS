@@ -11,8 +11,6 @@ const serverSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   /** URL pública da aplicação, usada em e-mails e callbacks de webhook. */
   APP_URL: z.string().url().default("http://localhost:3000"),
-  /** Segredo usado para assinar cookies de sessão. */
-  SESSION_SECRET: z.string().min(32).optional(),
 });
 
 type ServerEnv = z.infer<typeof serverSchema>;

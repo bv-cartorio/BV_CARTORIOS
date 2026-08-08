@@ -101,6 +101,12 @@ enum PostStatus {
   PUBLISHED
 }
 
+enum TokenPurpose {
+  /// Definir ou redefinir senha: primeiro acesso, migração e "esqueci a senha".
+  PASSWORD_RESET
+  EMAIL_VERIFICATION
+}
+
 // ---------------------------------------------------------------------------
 // Usuários, autenticação e assinaturas
 // ---------------------------------------------------------------------------
@@ -135,7 +141,7 @@ model User {
   resolvedReports   QuestionReport[]     @relation("ReportResolver")
   examAttempts      ExamAttempt[]
   sessions          Session[]
-  passwordResets    PasswordResetToken[]
+  tokens            UserToken[]
   authoredQuestions Question[]           @relation("QuestionAuthor")
   authoredPosts     Post[]
   announcementReads AnnouncementRead[]
@@ -163,18 +169,38 @@ model Session {
   @@map("sessions")
 }
 
-model PasswordResetToken {
-  id        String    @id @default(cuid())
+/// Token de uso único enviado por e-mail. Serve tanto para definir senha
+/// (primeiro acesso, migração, recuperação) quanto para confirmar o endereço.
+/// Guarda apenas o hash: quem lê o banco não consegue usar o link.
+model UserToken {
+  id        String       @id @default(cuid())
   userId    String
-  tokenHash String    @unique
+  purpose   TokenPurpose
+  tokenHash String       @unique
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime  @default(now())
+  createdAt DateTime     @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
-  @@map("password_reset_tokens")
+  @@index([userId, purpose])
+  @@index([expiresAt])
+  @@map("user_tokens")
+}
+
+/// Tentativas de login, para limitar força bruta. Fica no banco (e não em
+/// memória) porque em ambiente serverless cada requisição pode cair em um
+/// processo diferente — um contador em memória não limitaria nada.
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  email     String
+  ip        String?
+  succeeded Boolean
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+  @@index([ip, createdAt])
+  @@map("login_attempts")
 }
 
 model Plan {
