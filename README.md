@@ -17,8 +17,10 @@ legado (~5.000 questões comentadas e ~1.000 alunos com histórico de respostas)
 | Validação | Zod                                             |
 | Senhas    | bcrypt (`bcryptjs`, custo 12)                   |
 
-Vídeo, pagamentos, e-mail transacional e monitoramento entram por serviços
-externos — ver `docs/ROADMAP.md`.
+Venda e cobrança são feitas pela **Hotmart** (checkout hospedado; a aplicação
+libera o acesso por webhook — ver [`docs/HOTMART.md`](docs/HOTMART.md)). Vídeo,
+e-mail transacional e monitoramento entram por outros serviços externos, ver
+`docs/ROADMAP.md`.
 
 ## Requisitos
 
@@ -83,6 +85,7 @@ src/
 docs/
   ERD.md                 diagrama e decisões do modelo de dados
   MIGRACAO.md            plano de migração do sistema legado
+  HOTMART.md             integração com a Hotmart (venda e acesso)
   ROADMAP.md             módulos, ordem de entrega e decisões pendentes
 ```
 
@@ -113,4 +116,5 @@ provedor gerenciado).
 
 - [`docs/ERD.md`](docs/ERD.md) — modelo de dados e decisões de modelagem
 - [`docs/MIGRACAO.md`](docs/MIGRACAO.md) — migração do sistema legado
+- [`docs/HOTMART.md`](docs/HOTMART.md) — integração com a Hotmart
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — módulos e ordem de entrega

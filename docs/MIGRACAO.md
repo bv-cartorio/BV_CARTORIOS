@@ -73,13 +73,27 @@ relatadas**, nunca silenciosamente descartadas.
 
 ### 6. Assinaturas
 
-- assinatura ativa → `Subscription` com `status = ACTIVE`, `endsAt` igual ao fim
-  do ciclo vigente e `gatewaySubscriptionId` preenchido;
-- a recorrência continua no gateway; a nova plataforma passa a ouvir os
-  webhooks. **Nenhuma assinatura é recriada no gateway** — recriar geraria nova
-  cobrança;
-- conferência linha a linha contra o relatório de assinaturas ativas do painel
-  do gateway.
+A venda passa a ser feita pela Hotmart (ver [`HOTMART.md`](HOTMART.md)), o que
+divide este passo em dois casos:
+
+**Assinaturas que já estão na Hotmart.** A fonte de verdade é a própria
+Hotmart, não o banco legado. As assinaturas ativas são lidas pela API de
+assinaturas e casadas com os alunos **pelo e-mail**; cada uma vira um
+`Subscription` com `gateway = "hotmart"` e `gatewaySubscriptionId` igual ao
+código do assinante. A recorrência segue intocada na Hotmart — **nada é
+recriado**, sob pena de gerar cobrança nova.
+
+**Assinaturas fora da Hotmart** (cobrança antiga, manual ou por outro meio).
+Migram do banco legado com a vigência que têm, e expiram naturalmente ao fim do
+ciclo. A partir daí, a renovação acontece pela Hotmart como qualquer compra
+nova. O aluno precisa ser avisado disso antes do corte.
+
+Em ambos os casos, conferência linha a linha contra o relatório de assinaturas
+ativas — o da Hotmart e o do meio antigo, se houver.
+
+Divergências de e-mail entre o legado e a Hotmart são o ponto de atrito mais
+provável desta etapa: são listadas em relatório e resolvidas uma a uma **antes**
+do corte, nunca por adivinhação automática.
 
 ### 7. Cadernos, favoritas e anotações
 
