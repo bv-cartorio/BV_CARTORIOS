@@ -81,9 +81,15 @@ src/
   app/
     (auth)/              login, cadastro, recuperação e definição de senha
     painel/              área do aluno (exige sessão)
-  components/            componentes de interface
+      questoes/          busca, resolução e ações sobre a questão
+  components/
+    filtros/             barra de filtros da busca
+    painel/              navegação da área do aluno
+    questao/             cartão, alternativas, resolução, anotação e reporte
+    ui/                  peças genéricas de interface
   lib/
     auth/                sessão, senha, tokens, guardas e rate limiting
+    questoes/            filtros, consulta do acervo e cota do plano gratuito
   generated/prisma/      Prisma Client gerado (fora do controle de versão)
 docs/
   ERD.md                 diagrama e decisões do modelo de dados

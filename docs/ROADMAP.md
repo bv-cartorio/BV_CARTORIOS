@@ -30,15 +30,23 @@ implementação.
 - envio de e-mail com implementação de console em desenvolvimento; falha
   explícita em produção enquanto o provedor não for escolhido
 
-## Próximos módulos
-
 ### 2. Área do aluno — resolver questões
 
-Busca e filtros (matéria, assunto, banca, ano, respondidas/não,
-acertadas/erradas), resolução com feedback imediato, comentário rico, vídeo
-quando houver, favoritas, anotações e reporte de erro.
+- busca por texto ou número da questão e filtros de matéria, assunto,
+  subassunto, banca, ano, situação e favoritas — tudo na URL, então o link é
+  compartilhável e o botão voltar funciona
+- resolução com correção imediata, comentário do professor e vídeo quando
+  houver; o aluno pode responder de novo (o histórico guarda toda tentativa)
+- favoritas, anotação pessoal por questão e reporte de erro para a revisão
+  editorial
+- **gabarito e comentário nunca vão para o navegador antes de a questão ser
+  respondida** — só a server action de resposta os devolve
+- acesso gratuito por cota diária (ver decisões abaixo)
 
-**Depende de**: 1.
+Sem migration: `Answer`, `Favorite`, `QuestionNote` e `QuestionReport` já
+existiam desde a fundação.
+
+## Próximos módulos
 
 ### 3. Admin — questões e taxonomia
 
@@ -114,13 +122,18 @@ checklist de LGPD (exportação e exclusão de dados).
 | Decisão              | Escolha                                              |
 | -------------------- | ---------------------------------------------------- |
 | Venda e cobrança     | **Hotmart** — checkout hospedado, sem gateway próprio |
+| Acesso do não assinante | **Cota diária**: 10 questões por dia, com comentário completo |
+
+Sobre a cota: conta **questões distintas respondidas no dia**, virando à
+meia-noite de Brasília — refazer uma questão já respondida não gasta cota, e
+navegar, filtrar e buscar são livres para todo mundo. O número mora em
+`src/lib/questoes/cota.ts`; mudá-lo é uma linha, sem migration.
 
 ## Pendências da contratante
 
 | Pendência                                  | Necessária a partir de |
 | ------------------------------------------ | ---------------------- |
 | **E-mail transacional** (Resend · Postmark) | ir ao ar com o módulo 1 |
-| **O que o não assinante pode ver** de graça | módulo 2               |
 | Credenciais de desenvolvedor da Hotmart    | módulo 5               |
 | Códigos de produto e de oferta de cada plano | módulo 5             |
 | Serviço de vídeo (Panda · Mux · Vimeo Pro) | módulo 3               |
@@ -133,10 +146,11 @@ não há como enviar o link de definição de senha. Em desenvolvimento o link �
 escrito no console, então dá para construir e testar o módulo inteiro antes da
 escolha — mas não para colocá-lo no ar.
 
-Com o autocadastro liberado, é preciso decidir **o que um visitante sem
-assinatura enxerga**: um número de questões por dia, um conjunto fixo de
-demonstração, ou apenas os enunciados sem o comentário. A guarda de assinatura
-já fica pronta no módulo 1; a regra do gratuito é definida no módulo 2.
+O serviço de vídeo continua pendente: o campo já existe na questão e o player
+sai pronto para YouTube e Vimeo, mas Panda e Mux dependem de dados da conta
+(identificador da biblioteca, componente próprio) que só existem depois da
+escolha. Enquanto isso, questão com vídeo desses dois provedores simplesmente
+não exibe o bloco, em vez de mostrar um player quebrado.
 
 Sobre a última linha: a home traz números reais lidos do banco, mas ainda não
 tem a seção de depoimentos. Ela só será construída com depoimentos verdadeiros
